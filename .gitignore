@@ -1,0 +1,9 @@
+node_modules/
+dist/
+release/
+resources/tools/
+*.log
+.DS_Store
+Thumbs.db
+屏幕截图*.png
+.claude/

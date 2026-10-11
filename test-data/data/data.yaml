@@ -1,0 +1,17 @@
+people:
+  - id: 1
+    name: 张三
+    dept: 研发
+    salary: 18500
+    active: true
+  - id: 2
+    name: 李四
+    dept: 市场
+    salary: 15200
+    active: false
+  - id: 3
+    name: 王五
+    dept: 财务
+    salary: 16800
+    active: true
+note: YAML 测试数据

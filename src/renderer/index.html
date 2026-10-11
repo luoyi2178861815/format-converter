@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;" />
+  <title>格式转换工具</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <span class="title">格式转换工具</span>
+    <span class="sub" id="appVer"></span>
+    <button class="ghost" id="btnUpdate" hidden></button>
+    <span class="spacer"></span>
+    <button class="ghost" id="btnAdvanced">高级选项</button>
+    <button class="ghost" id="btnWarehouse">转换仓库<span class="count" id="whCount" hidden>0</span></button>
+    <button class="ghost" id="btnTools">工具 / 设置</button>
+    <button class="iconbtn" id="btnTheme" title="切换主题">◐</button>
+  </header>
+
+  <div class="advanced" id="advanced">
+    <div class="opt-tabs" role="tablist" id="optTabs" aria-label="选项分组">
+      <button role="tab" data-cat="all" aria-selected="true">全部</button>
+      <button role="tab" data-cat="image" aria-selected="false">图片</button>
+      <button role="tab" data-cat="media" aria-selected="false">音视频</button>
+      <button role="tab" data-cat="document" aria-selected="false">文档</button>
+      <button role="tab" data-cat="data" aria-selected="false">数据</button>
+      <span class="grow"></span>
+      <select id="presetSelect" aria-label="方案"><option value="">— 方案 —</option></select>
+      <button id="btnPresetSave" class="ghost" disabled>保存为方案</button>
+      <button id="btnPresetDel" class="ghost" disabled>删除方案</button>
+    </div>
+    <div class="opt-fields" id="optFields">
+      <label class="field wide" data-cat="common">输出目录
+        <input type="text" id="optOutdir" readonly placeholder="未选择" />
+      </label>
+      <label class="field checkfield" data-cat="common">自定义文件名
+        <input type="checkbox" id="optCustomName" />
+      </label>
+      <label class="field" data-cat="image">图片质量
+        <input type="number" id="optQuality" min="1" max="100" placeholder="默认" />
+      </label>
+      <label class="field" data-cat="image">图片最大宽
+        <input type="number" id="optWidth" min="1" placeholder="默认" />
+      </label>
+      <label class="field" data-cat="media">音频码率
+        <input type="text" id="optBitrate" placeholder="如 192k" />
+      </label>
+      <label class="field" data-cat="media">视频 CRF
+        <input type="number" id="optCrf" min="0" max="51" placeholder="23" />
+      </label>
+      <label class="field" data-cat="media">GIF 帧率
+        <input type="number" id="optFps" min="1" max="60" placeholder="12" />
+      </label>
+      <label class="field" data-cat="media">编码器
+        <select id="optHwaccel">
+          <option value="auto">自动（推荐）</option>
+          <option value="off">仅软件</option>
+          <option value="nvenc" disabled>NVIDIA NVENC</option>
+          <option value="qsv" disabled>Intel QSV</option>
+          <option value="amf" disabled>AMD AMF</option>
+        </select>
+      </label>
+      <label class="field checkfield" data-cat="media">优先无损换容器
+        <input type="checkbox" id="optRemux" checked />
+      </label>
+      <label class="field" data-cat="data">文本输入编码
+        <select id="optEncoding">
+          <option value="">自动识别</option>
+          <option value="utf8">UTF-8</option>
+          <option value="gb18030">GBK / GB18030</option>
+          <option value="utf16le">UTF-16 LE</option>
+          <option value="big5">Big5</option>
+        </select>
+      </label>
+      <label class="field checkfield" data-cat="data">CSV / TSV 带 BOM
+        <input type="checkbox" id="optCsvBom" checked />
+      </label>
+      <div class="opt-empty" data-cat="document" hidden>暂无文档选项</div>
+    </div>
+  </div>
+
+  <main>
+    <div class="toolbar">
+      <button class="primary" id="btnAdd">选择文件</button>
+      <span class="outdir" id="outdirLabel"></span>
+      <span class="grow"></span>
+      <label class="switch">全部设为
+        <select id="globalTarget"><option value="">—</option></select>
+      </label>
+      <button id="btnClear">清空</button>
+      <button class="primary" id="btnConvert" disabled>开始转换</button>
+    </div>
+
+    <div class="content">
+      <div class="dropzone" id="dropzone">
+        <div class="big">拖入文件到此处</div>
+        <div class="hint">支持图片 · 音视频 · 文档 · 数据文件,可批量拖入,也可 Ctrl+V 粘贴</div>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+
+    <div class="logwrap">
+      <div class="loghead" id="logHead">
+        <span>日志</span>
+        <span class="grow"></span>
+        <span id="logToggle">展开 ▾</span>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </main>
+
+  <div class="modal-mask" id="toolsModal">
+    <div class="modal">
+      <h2>外部工具 / 设置</h2>
+      <div class="body" id="toolsBody"></div>
+      <div class="about" id="aboutBox">
+        <div class="about-row">
+          <span>当前版本 <b id="aboutVer">—</b></span>
+          <span class="grow"></span>
+          <button id="btnCheckUpdate">检查更新</button>
+        </div>
+        <div class="about-msg" id="updateMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="confirmModal">
+    <div class="modal small">
+      <h2 id="confirmTitle">确认</h2>
+      <div class="body">
+        <p class="confirm-msg" id="confirmMsg"></p>
+        <div class="modal-actions">
+          <button id="confirmCancel">取消</button>
+          <button class="primary" id="confirmOk">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="presetModal">
+    <div class="modal small">
+      <h2 id="presetTitle">保存为方案</h2>
+      <div class="body">
+        <p class="confirm-msg" id="presetMsg"></p>
+        <label class="preset-field">
+          <input type="text" id="presetName" maxlength="40" placeholder="方案名称" />
+        </label>
+        <div class="modal-actions">
+          <button id="presetCancel">取消</button>
+          <button class="primary" id="presetOk">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="missingModal">
+    <div class="modal small">
+      <h2>需要先安装外部工具</h2>
+      <div class="body">
+        <p class="confirm-msg">下面这些转换依赖外部工具,安装后即可继续。安装完成会自动回到这里。</p>
+        <div class="missing-list" id="missingList"></div>
+        <div class="modal-actions">
+          <button id="missingCancel">稍后</button>
+          <button class="primary" id="missingGo">去安装</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-mask" id="drawerMask"></div>
+  <aside class="drawer" id="drawer" aria-label="转换仓库" aria-hidden="true">
+    <div class="dr-head">
+      <span class="dr-title">转换仓库</span>
+      <span class="grow"></span>
+      <button class="iconbtn" id="drawerClose" title="关闭">✕</button>
+    </div>
+    <div class="dr-tools">
+      <input type="search" id="whSearch" placeholder="搜索文件名或格式" />
+      <div class="dr-filters" id="whFilters">
+        <button class="chip active" data-filter="all">全部</button>
+        <button class="chip" data-filter="ok">成功</button>
+        <button class="chip" data-filter="failed">失败</button>
+      </div>
+    </div>
+    <div class="dr-body" id="whBody"></div>
+    <div class="dr-foot">
+      <span class="dr-stat" id="whStat"></span>
+      <span class="grow"></span>
+      <button class="danger" id="whClear">清空历史</button>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

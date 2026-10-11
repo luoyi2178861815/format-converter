@@ -1,0 +1,9 @@
+{
+  "app": "格式转换工具",
+  "version": "1.0.0",
+  "debug": false,
+  "themes": [
+    "dark",
+    "light"
+  ]
+}

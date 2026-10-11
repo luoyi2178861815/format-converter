@@ -1,0 +1,4 @@
+﻿id,name,dept,salary,active
+1,张三,研发,18500,TRUE
+2,李四,市场,15200,FALSE
+3,王五,财务,16800,TRUE

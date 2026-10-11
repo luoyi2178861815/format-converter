@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<people>
+  <person><id>1</id><name>张三</name><dept>研发</dept><salary>18500</salary></person>
+  <person><id>2</id><name>李四</name><dept>市场</dept><salary>15200</salary></person>
+  <person><id>3</id><name>王五</name><dept>财务</dept><salary>16800</salary></person>
+</people>

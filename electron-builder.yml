@@ -1,0 +1,51 @@
+appId: com.formatconverter.desktop
+productName: 格式转换工具
+copyright: Copyright © 2026
+
+# 自动更新源：GitHub Releases
+publish:
+  - provider: github
+    owner: luoyi2178861815
+    repo: format-converter
+
+directories:
+  output: release
+  buildResources: build
+
+# 不打进安装包：测试脚本、单测、构建产物、外部工具（运行时下载到 userData）
+files:
+  - src/**/*
+  - package.json
+  - "!**/_*.js"
+  - "!test/**"
+  - "!release/**"
+
+asar: true
+# sharp / libvips 为原生二进制，必须解包出 asar
+asarUnpack:
+  - "**/node_modules/sharp/**"
+  - "**/node_modules/@img/**"
+
+# sharp 使用 N-API 预编译二进制，跨 Node/Electron ABI 稳定，无需重编译
+npmRebuild: false
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 格式转换工具
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}
+  requestExecutionLevel: user
